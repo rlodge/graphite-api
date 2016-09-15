@@ -117,10 +117,11 @@ class ConsistentHashRing(object):
 
 class CarbonLinkPool(object):
     def __init__(self, hosts, timeout=1, retry_delay=15,
-                 carbon_prefix='carbon', replication_factor=1,
+                 carbon_prefix='carbon', always_check_all=False, replication_factor=1,
                  hashing_keyfunc=lambda x: x):
         self.carbon_prefix = carbon_prefix
         self.retry_delay = retry_delay
+        self.always_check_all = always_check_all
         self.hosts = []
         self.ports = {}
         servers = set()
@@ -224,7 +225,7 @@ class CarbonLinkPool(object):
         result = {}
         result.setdefault('datapoints', [])
 
-        if metric.startswith(self.carbon_prefix):
+        if metric.startswith(self.carbon_prefix) or self.always_check_all:
             return self.send_request_to_all(request)
 
         host = self.select_host(metric)
